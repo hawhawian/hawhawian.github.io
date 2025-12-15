@@ -28,9 +28,27 @@
             return (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone === true);
         }
 
-        // 判斷是否為行動裝置
+        // 裝置偵測
+        function getDeviceType() {
+            const ua = navigator.userAgent;
+            if (/iPad/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document)) {
+                return 'iPad';
+            } else if (/iPhone|iPod/.test(ua)) {
+                return 'iPhone';
+            } else if (/Android/.test(ua)) {
+                // 區分 Android 平板與手機
+                if (!/Mobile/.test(ua)) {
+                    return 'AndroidTablet';
+                } else {
+                    return 'AndroidPhone';
+                }
+            }
+            return 'Other';
+        }
+
         function isMobile() {
-            return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+            const type = getDeviceType();
+            return type === 'iPhone' || type === 'iPad' || type === 'AndroidPhone' || type === 'AndroidTablet';
         }
 
         const notPwa = document.getElementById('not-pwa');
@@ -39,7 +57,8 @@
         // 顯示安裝教學
         function showInstallGuide() {
             const guide = document.getElementById('install-guide');
-            if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            const type = getDeviceType();
+            if (type === 'iPhone' || type === 'iPad') {
                 guide.innerHTML = `
                     <h3>iOS 安裝教學</h3>
                     <ol style="margin:auto;max-width:320px;">
@@ -49,7 +68,7 @@
                         <li>點擊右上角的 <b>加入</b>。</li>
                     </ol>
                 `;
-            } else if (/Android/i.test(navigator.userAgent)) {
+            } else if (type === 'AndroidPhone' || type === 'AndroidTablet') {
                 guide.innerHTML = `
                     <h3>Android 安裝教學</h3>
                     <ol style="margin:auto;max-width:320px;">
