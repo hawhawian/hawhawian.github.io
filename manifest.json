@@ -1,0 +1,15 @@
+{
+  "name": "3D掃描器 App",
+  "short_name": "3D掃描器",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f8f8f8",
+  "theme_color": "#0078d7",
+  "icons": [
+    {
+      "src": "camera.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    }
+  ]
+}

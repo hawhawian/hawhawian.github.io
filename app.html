@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D掃描器 App</title>
+    <link rel="icon" type="image/png" href="/img/camera.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style/style.css">
+</head>
+<body>
+    <div id="not-pwa" style="display:none;">
+        <h2>請將網頁加入主畫面</h2>
+        <div id="install-guide"></div>
+    </div>
+    <div id="pwa-app" style="display:none;">
+        <h1>3D掃描器 App</h1>
+        <button id="camera-btn">開啟相機</button>
+        <div>
+            <label for="cameraSelect">切換鏡頭：</label>
+            <select id="cameraSelect"></select>
+        </div>
+        <video id="video" autoplay playsinline style="width:100%;max-width:400px;"></video>
+    </div>
+    <script>
+        // 判斷是否為PWA模式
+        function isInStandaloneMode() {
+            return (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone === true);
+        }
+
+        // 判斷是否為行動裝置
+        function isMobile() {
+            return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+        }
+
+        const notPwa = document.getElementById('not-pwa');
+        const pwaApp = document.getElementById('pwa-app');
+
+        // 顯示安裝教學
+        function showInstallGuide() {
+            const guide = document.getElementById('install-guide');
+            if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+                guide.innerHTML = `
+                    <h3>iOS 安裝教學</h3>
+                    <ol style="margin:auto;max-width:320px;">
+                        <li>請使用 <b>Safari</b> 開啟本網頁。</li>
+                        <li>點擊下方的 <b>分享</b> 按鈕 。</li>
+                        <li>選擇 <b>加入主畫面</b>。</li>
+                        <li>點擊右上角的 <b>加入</b>。</li>
+                    </ol>
+                `;
+            } else if (/Android/i.test(navigator.userAgent)) {
+                guide.innerHTML = `
+                    <h3>Android 安裝教學</h3>
+                    <ol style="margin:auto;max-width:320px;">
+                        <li>請使用 <b>Chrome</b> 瀏覽器開啟本網頁。</li>
+                        <li>點擊右上角的 <b>三個點</b> 選單。</li>
+                        <li>選擇 <b>加入主畫面</b> 或 <b>安裝應用程式</b>。</li>
+                        <li>依指示完成安裝。</li>
+                    </ol>
+                `;
+            } else {
+                guide.innerHTML = '';
+            }
+        }
+
+        // 僅在行動裝置且未以PWA模式開啟時顯示提示
+        if (isMobile() && !isInStandaloneMode()) {
+            notPwa.style.display = 'block';
+            pwaApp.style.display = 'none';
+            showInstallGuide();
+        } else {
+            notPwa.style.display = 'none';
+            pwaApp.style.display = 'block';
+        }
+
+        // 相機功能
+        let currentStream = null;
+        const video = document.getElementById('video');
+        const cameraSelect = document.getElementById('cameraSelect');
+        const cameraBtn = document.getElementById('camera-btn');
+
+        async function getCameras() {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            return devices.filter(device => device.kind === 'videoinput');
+        }
+
+        async function startCamera(deviceId) {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+            const constraints = {
+                video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode: "environment" }
+            };
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = stream;
+                currentStream = stream;
+            } catch (e) {
+                alert('無法開啟相機: ' + e.message);
+            }
+        }
+
+        cameraBtn.onclick = async () => {
+            const cameras = await getCameras();
+            cameraSelect.innerHTML = '';
+            cameras.forEach(cam => {
+                const option = document.createElement('option');
+                option.value = cam.deviceId;
+                option.text = cam.label || `鏡頭 ${cameraSelect.length + 1}`;
+                cameraSelect.appendChild(option);
+            });
+            if (cameras.length > 0) {
+                startCamera(cameras[0].deviceId);
+            }
+        };
+
+        cameraSelect.onchange = () => {
+            startCamera(cameraSelect.value);
+        };
+
+        // 若已在PWA模式，自動請求相機權限
+        if (!isMobile() || isInStandaloneMode()) {
+            cameraBtn.click();
+        }
+    </script>
+</body>
+</html>

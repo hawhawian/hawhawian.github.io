@@ -1,0 +1,37 @@
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f8f8f8;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+.container {
+    margin-top: 60px;
+}
+button {
+    padding: 10px 24px;
+    font-size: 1.1em;
+    margin-top: 20px;
+    border-radius: 8px;
+    border: none;
+    background: #0078d7;
+    color: #fff;
+    cursor: pointer;
+}
+button:hover {
+    background: #005fa3;
+}
+#install-guide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+#install-guide ol {
+    margin: auto;
+    padding-left: 1.2em;
+    text-align: left;
+}
+#install-guide h3 {
+    margin-bottom: 0.5em;
+}
